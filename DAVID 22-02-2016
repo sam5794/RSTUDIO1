@@ -1,0 +1,97 @@
+## abrir archivo endbf
+
+library (foreign)
+require (foreign)
+
+sdem215 <- read.dbf("C:\\Users\\SALA-C18\\Downloads\\sdemt215\\SDEMT215.dbf")
+sdem215<- data.frame(sdem215)## Hacemos que la base de datos sea data frame
+
+str(sdem215)## sdr sirve que variables hay que tipo es y los valores
+
+attach(sdem215)
+
+table (SEX)
+table(EDA)
+EDA1 <- as.numeric(as.character(EDA)) ## cambia de numero a variable
+
+table (EDA1)
+table (NAC_MES)
+
+require (car)
+library (car)
+
+install.packages("car")
+
+
+require (car)
+ library (car)
+
+require (car)
+ gedad <- recode (EDA1, '1:4 = 2 ; 5:95 = 1') ##recodificando un rango
+ 
+ 
+ install.packages("memisc")
+ install.packages("lattice")
+ install.packages("MASS")
+ 
+ require (memisc)
+ require (lattice)
+ require (MASS)
+ install.packages("car")
+ require (car)
+ gedad <- recode (EDA1, '1:4 = 2 ; 5:95 = 1') ##recodificando un rango
+ 
+ 
+ 
+ ##Ponderar casos
+ 
+ require (questionr)
+ 
+ install.packages("questionr")
+ require (questionr)
+
+ c0 <- table(sdem215$SEX) 
+
+ c0 
+
+ c1 <- wtd.table (sdem215$SEX, weights = sdem215$FAC)
+ 
+table (c1)
+
+write.csv (c1, file = 'C:\\Users\\SALA-C18\\Documents\\ponderar.csv' )## lo guarda en excel
+
+
+c1
+
+## obtiene la tabla expandida con las nuevas etiquetas de clase 1. emplea la variable de FAC (
+##FACTOR DE EXPANMSION
+## se asigna a una variable para poderla exportar
+
+####PORCENTAJE#######
+
+tabrama <- wtd.table(sdem215$SEX, weights = sdem215$FAC)
+c1.1 <- round((tabrama/margin.table(tabrama))*100, 2)
+
+write.csv (c1, file = 'C:\\Users\\SALA-C18\\Documents\\porcentaje.csv' )
+c1.1
+
+#####OCUPADOS Y NO OCUPADOS######
+
+sdem215$SEX <- ordered(sdem215$SEX, levels = c(1,2), labels = c("HOMBRES","MUJERES"))
+##obtiene la variable clase2 (POblacion ocupada y no ocupada ) a la cual asigna etiquetas a los niveles
+
+c2 <- wtd.table (sdem215$SEX, weights = sdem215$FAC)
+c2
+write.csv(c2, file = 'C:\\Users\\SALA-C18\\Documents\\ocupados.csv')
+View(sdem215)
+
+
+##EJERCICIO CLASE ETIQUETEN LA VARIABLE NAC_MES###
+
+sdem215$NAC_MES <- ordered(sdem215$NAC_MES, levels = c("01","02","03","04","05","06","07","08","09","10","11","12","99"), labels = c("ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE","NOESPECIFICADO"))
+c3 <- wtd.table (sdem215$NAC_MES, weights = sdem215$FAC)
+c3
+write.csv(c3, file = 'C:\\Users\\SALA-C18\\Documents\\nacmes.csv')
+View(sdem215)
+
+
