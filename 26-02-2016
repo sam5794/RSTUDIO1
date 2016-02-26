@@ -1,0 +1,78 @@
+library (foreign)
+require (foreign)
+
+SDEMT215 <- data.frame(read.dbf("C:\\Users\\SALA-C30\\Downloads\\sdemt215\\SDEMT215.dbf"))
+
+## coe1t215 <- data.frame (read.dbf("COE1T215.dbf))
+## coe2t215 <- data.frame (read.dbf("COE2T215.dbf))
+#4.1 recodificacion de variables numericas (rangos)
+#metodo 1
+#attach (SDEMT215)
+
+SDEMT215$CLASE2.1[as.numeric(SDEMT215$CLASE2)>= 0 & as.numeric(SDEMT215$CLASE2)<=2]<-1
+
+SDEMT215$CLASE2.1[as.numeric(SDEMT215$CLASE2)>= 3 & as.numeric(SDEMT215$CLASE2)<=4]<-2
+
+#detach (SDEMT215)
+
+#METODO 2
+
+attach (SDEMT215)
+
+SDEMT215$CLASE2.2 <- ifelse(as.numeric(CLASE2) >= 1 & as.numeric(CLASE2)<=2,1,
+                            ifelse(as.numeric(CLASE2)>=3 & as.numeric(CLASE2)<=3,2,3))
+
+detach (SDEMT215)
+
+#4.1.1 comparacion de los tres metodos
+
+install.packages("questionr")
+require(questionr)
+wtd.table(SDEMT215$CLASE2.1)
+wtd.table(SDEMT215$CLASE2.2)
+
+table (SDEMT215$EDA)
+
+#####EJERCICIO RECODIFICAR VARIABLE EDAD#######
+### 0 A 14=1 NIÑOS, 15 A 29=2 JOVENES, 30 A 59= 3 ADULTOS
+### 60 A 97 = 4 ADULTOS MAYORES, 98 Y 99 = 5 NO0 ESPECIFICADO
+###POR LOS DOS METODOS
+###DESPUES ETIQUETAN LOPS GRUPOS
+###COMPARAR METODOS#####
+
+SDEMT215$EDA1[as.numeric(SDEMT215$EDA)>= 1 & as.numeric(SDEMT215$CLASE2)<=15]<-1
+SDEMT215$EDA1[as.numeric(SDEMT215$EDA)>= 16 & as.numeric(SDEMT215$CLASE2)<=30]<-2
+SDEMT215$EDA1[as.numeric(SDEMT215$EDA)>= 31 & as.numeric(SDEMT215$CLASE2)<=61]<-3
+SDEMT215$EDA1[as.numeric(SDEMT215$EDA)>= 61 & as.numeric(SDEMT215$CLASE2)<=99]<-4
+SDEMT215$EDA1[as.numeric(SDEMT215$EDA)>=99 & as.numeric(SDEMT215$CLASE2)<=100]<-5
+
+wtd.table(SDEMT215$EDA1)
+
+
+#METODO 2
+
+attach (SDEMT215)
+
+
+SDEMT215$EDA.2 <- ifelse(as.numeric(EDA) >= 1 & as.numeric(EDA)<=15,1,
+                 ifelse(as.numeric(EDA)>=16 & as.numeric(EDA)<=30,2,
+                 ifelse(as.numeric(EDA)>=31 & as.numeric(EDA)<=60,3,
+                 ifelse(as.numeric(EDA)>=61 & as.numeric(EDA)<=98,4,5))))
+
+detach (SDEMT215)
+
+
+wtd.table(SDEMT215$EDA.2)
+
+###PONER ETIQUETAS
+
+SDEMT215$EDA1 <- factor(SDEMT215$EDA1,
+                      levels = c(1,2,3,4,5),
+                      labels = c("NIÑOS", "JOVENES", "ADULTOS","ADULTOS MAYORES", "NO ESPECIFICADO")) 
+wtd.table(SDEMT215$EDA1)
+
+SDEMT215$EDA.2 <- factor(SDEMT215$EDA.2,
+                        levels = c(1,2,3,4,5),
+                        labels = c("NIÑOS", "JOVENES", "ADULTOS","ADULTOS MAYORES", "NO ESPECIFICADO")) 
+wtd.table(SDEMT215$EDA.2)
+
