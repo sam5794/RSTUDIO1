@@ -1,0 +1,43 @@
+data (AirPassengers)
+
+panam <- (AirPassengers)
+
+class(panam)
+
+start(panam); end(panam); frequency(panam)
+
+panam
+
+ts()### funcion para declarar una base de datos
+##como serie de tiempo
+
+layout(1:2)
+plot(panam, main="Numero de Pasajeros aereos en Estados Unidos, 1949-1960", ylab="Pasajeros (miles)", xlab="Años")
+
+plot (aggregate(panam)) ## sireve para obtenr la linea de tiempo
+
+##ppp <- ts(base1, start = c(1998,1), freq = 4)##funcion para declarar una base
+
+###Ejercicio
+###  1) Generar un dta frame con la tasa de desocupacion en el primer trimestre del 2005
+### tasa de desocupacion 3.4, 4.8, 3.3, 5.6, 3.2, 2.9, 1.9, 2.8, 6.0, 4.3, 2.2
+### 2) convertirla en serie de tiempo y graficar la ST y la tendencia 
+###  punto extra para librar el segundo examen 
+### 3) obtener un pdf, jpg, tiff con las dos graficas en una misma imagen 
+
+
+td <- c(3.4,4.8, 3.3, 5.6, 3.2, 2.9, 1.9, 2.8, 6.0, 4.3, 2.2)
+td
+tasad <- data.frame(td)
+class(tasad)
+
+sttd <- ts(tasad,start = c(2005,1), freq=4)
+ class(sttd)
+
+ pdf("Tarea.pdf")
+layout(1:2)
+plot(sttd, main="Tasa de Desocupación desde el primer trimestre de 2005", ylab="Tasa", xlab="Trimestre")
+ 
+plot (aggregate(sttd)) 
+
+
