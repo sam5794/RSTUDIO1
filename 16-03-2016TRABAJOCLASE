@@ -1,0 +1,52 @@
+#### Generar 4 objetos con datos aleatorios y que tengan 60 datos
+### dato 1 de n?mero de profesionista (mill)rango de 5 a 8
+### dato 2 crec pib rango de 0 a 5
+### dato 3 porcentaje de ocupados rango de 40 a 60
+### dato 4 porcentaje de desocupados rango de 3 a 8
+#### 1) una vez que generen los datos hacer un data frame de los 4 objetos
+#### 2) mostrar en consola los primeros 12 y ultimos 12 datos
+#### 3) convertir los objetos en series de tiempo desde el data frame comezando en 2010 y son datos mensuales
+#### 4) graficar los profesionistas y ocupados en la misma imagen
+#### 5) graficar pib y desocupados en la misma imagen
+#### 6) graficar todas juntas
+### 7) creaR serie de tiempo multiple!!!!8
+#### 8 ) graficar serie de tiempo multiple 
+#### 9 ) dividir serie de tiempo y graficar solo el ultimo año...
+#### 8 ) analizar las graficas ( si hay alguna tendencia o variacion estacional) (investigar)
+
+
+numprof <- sample(5:8, 60, replace =T)
+crecpib <- sample(0:5,60, replace=T)
+ocupados <- sample(40:60,60, replace=T)
+desocupados <- sample(3:8,60, replace=T)
+ df <- data.frame("numprof","crecpib","ocupados","desocupados")
+ class(df)
+ 
+ serie <- ts(df, frequency = 12, start = 2010)
+ class (serie)
+ 
+ numprof1 <- ts(numprof , start=2010, freq = 12 )
+ crecpib1 <- ts(crecpib , start=2010, freq = 12 )
+ ocupados1 <- ts(ocupados, start = 2010, freq = 12)
+ desocupados1 <- ts(desocupados, start = 2010, freq=12)
+
+ layout(1:2)
+ plot(numprof1,main="Profesionistas", ylab="Profesionistas (millones)", xlab="Años")
+ plot(ocupados1,main="Ocupados", ylab="PIB", xlab="Años")
+ 
+ layout(1:2)
+ plot(crecpib1,main="PIB", ylab="PIB", xlab="Años")
+ plot(desocupados1,main="Descupados", ylab="Desocupados", xlab="Años")
+ 
+ plot(cbind(numprof1,ocupados1,crecpib1,desocupados1), main = "Serie de Tiempo", col = "blue")
+ 
+ seriemultiple <- ts.intersect(numprof1,ocupados1,crecpib1,desocupados1)
+ plot(seriemultiple, main = "Serie de Tiempo", col = "salmon")
+ 
+ seriemultiple01.15<- window(seriemultiple,start=c(2014,1), end=c(2014,12))
+ plot(seriemultiple01.15, main = "Serie de Tiempo Multiple", col= "salmon")
+ 
+ plot(aggregate(seriemultiple))
+ 
+ ### NO HAY ESTACIONALIDAD PORQUE NO HAY PETRONES REPETIDOS
+ 
