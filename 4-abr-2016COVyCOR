@@ -1,0 +1,128 @@
+ica <- read.csv("C://Users//SALA-C28//Documents//ICA.csv", header= T)
+icats <- ts(ica [,5], start=2000, frequency = 12)
+install.packages("fpp")
+require (fpp)
+
+seasonplot(icats, s=12, year.labels = TRUE,
+           main = "valor acciones ICA",
+           ylab= "valor cierre", col= rainbow(20),
+           year.labels.left = TRUE,pch=19)
+
+## con monthplot podemos hacer un analisis de la st dependiendo de la periocidad de los datos
+
+## de los datos por ejemplo si tenemos trimestral se pueden analizar los 4 trimestres....
+##en grafica
+
+monthplot(icats,ylab="valor cierre",xlab="Month",
+          main="valor acciones ICA")
+
+
+
+######correlacion y covarianza
+#covarianza y correlacion: medida del grado de relacion lineal entre dos variables(y Y x)
+###autocovarianza y autocorrelacion
+### autocovarianza y autocorrelacion: medida de relacion
+# lineal entre los valores retardados de una serie de tiempo y
+# se mide  la relación entre: yt and yt−1
+#yt and yt−2
+#yt and yt−3, etc.
+
+
+###3 para desestacionalizar y eliminar la tendencia necesitamos conocer la correlacion de 
+### las variables para realizar mejores pronosticos de nuestra serie de tiempo 
+
+### en muchas casos las variables estan correlacionadas... entonces si nosotros logramos 
+#identificar la correlacion podemos mejorar los pronosticoa si las correlaciones son altasst 
+### la correlacion estructura en ST esta determinada por la función de correlacion y se estima
+### para la ST observada 
+
+###Autocorrelación
+# a veces sucede que  los valores que toma una variable en el tiempo no
+#son independientes entre sí, sino que un valor determinado depende de los valores anteriores,
+
+
+### para obtener la correlación se necesita obytener primero la covarianza
+#### 
+
+bim <- read.csv("C://Users//SALA-C28//Documents//BIMBO.csv", header= T)
+bimts <- ts(bim [,5], start=2000, frequency = 12)
+
+apple<- read.csv("C://Users//SALA-C28//Documents//APPLE.csv", header= T)
+applets <- ts(apple [,5], start=2000, frequency = 12)
+############ covarianza 
+#ejercicio en r verifiquewn que la formula de la covarianza
+#y la correlacion den el mismo resultado que las funciones cov(x,y) y cor(x,y)
+## la covarianza es una medida de asociación entre dos variables
+### Cov(x, y) =(x i − x (media))(y i − y ((media)))/(n − 1)
+#cov(x,y)=suma((xi-x(media))(yi-y((media))))/(n-1)
+##ejemplo en R
+
+#covarianza
+n<- length(icats)
+sum(((icats) - mean(icats))*((bimts) - mean(bimts))) / (n - 1) ## calculamos la covarianza  con formula
+cov(icats, bimts) ### funcion de R para obtener la covarianza
+
+
+## la correlacion tambien es una medida de relacion entre dos variables que permite 
+#Cor(x, y) = Cov(x, y) \ sd(x)sd(y)
+
+cov(icats,bimts) / (sd(icats)*sd(bimts)) #calculamos la correlacion con formula
+
+cor(icats,bimts) # funcion de R para obtener la correlacion
+
+###EJERCICIO
+## 1. ANALIZAR LOS AÑOS DE LAS 3 EMPRESAS ELEGIDAS (SEASONPLOT) Y
+#ELEGIR LOS 3 AÑOS QUE UBIQUEN CON ESTACIONALIDAD, CICLO O TENDNECIA
+#INTERPRETRA LOS 3 AÑOS
+## 2. CALCULAR CON LA FORMULA Y FUNCION DE COVARIANZA Y CORRELACION 
+#EN LA COMBINACION DE LAS 3 EMPRESAS ES DECIR
+#EMPRESA 1=X; EMPRESA2 = Y, EMPRESA 3= Z, CALCULAR LAS CORRELACION DE 
+# COR (X,Y, Y,Z, X,Z) PARA HACERLAS COMPATIBLES UTILIZAR EL WINDOW
+
+seasonplot(icats, s=12, year.labels = TRUE,
+           main = "valor acciones ICA",
+           ylab= "valor cierre", col= rainbow(20),
+           year.labels.left = TRUE,pch=19)
+
+seasonplot(bimts, s=12, year.labels = TRUE,
+           main = "valor acciones bimbo",
+           ylab= "valor cierre", col= rainbow(20),
+           year.labels.left = TRUE,pch=19)
+
+seasonplot(applets, s=12, year.labels = TRUE,
+           main = "valor acciones apple",
+           ylab= "valor cierre", col= rainbow(20),
+           year.labels.left = TRUE,pch=19)
+
+### lo unico que se puede observar  es que hay estacionalidad en el año 2008
+
+######covarianza
+n<- length(icats)
+#empresa 1,2
+sum(((icats) - mean(icats))*((bimts) - mean(bimts))) / (n - 1) 
+cov(icats, bimts)
+#empresa 1,3
+sum(((icats) - mean(icats))*((applets) - mean(applets))) / (n - 1) 
+cov(icats, applets)
+#empresa 2,3
+sum(((bimts) - mean(bimts))*((applets) - mean(applets))) / (n - 1) 
+cov(bimts, applets)
+
+###correlacion 
+#empresa 1,2
+cov(icats,bimts) / (sd(icats)*sd(bimts)) 
+
+cor(icats,bimts) 
+
+#empresa 1,3
+cov(icats,applets) / (sd(icats)*sd(applets)) 
+
+cor(icats,applets) 
+
+#empresa 2,3
+cov(bimts,applets) / (sd(bimts)*sd(applets)) 
+
+cor(bimts,applets) 
+
+
+
