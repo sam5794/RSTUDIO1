@@ -1,0 +1,48 @@
+##EXAMEN
+## 1) GENERARUN SCRIPT
+## 2) EL PROFESOR ENTREGA UN SCRIPT Y NOS DICE EN QUE LINEAS EXPLICAR O REALIZAR COMENTARIOS
+### ESTRUCTURA EXAMEN ####
+### 1) MANEJO DE BASES DE DATOS EN R
+        #EXPORTAR BAS, ETIQUETAR, GENERAR LA BASE DE DATOS, RECODIFICAR, SELECCIONAR CASOS
+        #GRAFICAR
+### 2) SERIES DE TIEMPO EN R
+      #DECLARAR UNA ST, DIVIDR ST, GRAFICAR ST
+      #INTERPRETAR GRAFICAS CON ESTACIONALIDAD,
+      #TENDENCIA Y CICLO
+### 2.1) COMO DETEREMINAR ESTACIONAIDAD  EN UNA ST CON LA FUNCION AUTOCORELACION, CALCULO DE
+          #CORRELACION Y COVARIANZA
+      ######REPASO 11 DE ABRIL#########
+
+
+
+###FUNCION DE AUTOCORRELACION !!1
+###LA AUTOCORRELACION MIDE LA CORRELACION ENTRE DOS VARIABLES
+###SEPARADAS POR K PERIODOS
+###PROPIEDADES DE LA AUTOCRRELACION
+#P() = 1
+#-1 <= P()1
+#SIMETRIA Pj=pj-1
+
+install.packages("fpp")
+require (fpp)
+
+Acf(beer) ### funcion para conocer la autocorrelacion de los datos
+xx <- Acf(beer, main="Acf of quarterly beer production"
+
+
+### la grafica que genera eñ ACF se le denomina correlograma
+# Y PERMITE IDENTIFICAR
+# LA AUTOCORRELACION EN UNA SERIE DE TIEMPO
+
+#SI HAY ESTACIONALIDAD , la ACF en el desfase temporal sera grande y positivo
+
+###NETFLIX
+
+nfix <- read.csv("C://Users//SALA-C21//Documents//NETFLIX.csv", header = T)
+nfixts <- ts(nfix [,5], start = 2015, frequency = 12)
+plot.ts (nfixts)
+
+Acf(nfixts)
+ xx<- Acf(nfixts, main="Acf of quarterly beer production")
+xx$acf
+
