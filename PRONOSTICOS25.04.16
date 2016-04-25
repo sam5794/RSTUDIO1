@@ -1,0 +1,46 @@
+install.packages("fpp")
+library (fpp)
+require (forecast)
+
+precio<- read.csv("C:\\Users\\SALA-C19\\Documents\\SAM\\BASE.csv",header = T)
+precio
+
+openbimbo <- ts(precio [,2], start = 2000, frequency = 12)
+plot(openbimbo)
+
+acf(openbimbo)
+
+######part, h
+openbimbopro <- meanf(openbimbo,12)
+plot(openbimbopro)
+
+####ingenuo 
+
+openbimbonai <- naive(openbimbo,4)
+plto(openbimbo)
+
+
+###derivada
+
+openbimboder <- rwf(openbimbo,4,drift = T)
+
+plot(openbimboder)
+
+
+###ejemplo#####
+
+openbimbo1 <- window(openbimbo, start =2000, end= 2010)
+plot (openbimbo1)
+
+openbimboaj1 <- meanf(openbimbo1, h=12)
+openbimboaj2 <- naive(openbimbo1, h=12)
+openbimboaj3 <- snaive(openbimbo1, h=12)
+
+
+plot(openbimbo, plot.conf = FALSE,main = "proyeccion precio de aprtura de acciones bimbo",xlim=2011)
+lines(openbimboaj1$mean, col=1)
+lines(openbimboaj2$mean, col =2)
+lines(openbimboaj3$mean, col =3)
+
+legend("topleft",lty=1,col= c(1,2,3),
+       legend=c("metodo media","metodo ingenuo","metodo ingenuo estacional"))
