@@ -1,0 +1,21 @@
+pib<- read.csv("C:\\Users\\TEMP\\Documents\\PIB.csv",header = F)
+pib
+
+pibts <- ts(precio [,2], start = 1993, end= 2015,frequency = 4)
+plot(pibts)
+
+acf(pibts)
+
+pibtspro <- meanf(pibts, 4)
+plot(pibtspro)
+pibtsnai <- naive(pibts,4)
+plot(pibtsnai)
+pibtssnai <- snaive(pibts,4)
+plot(pibtssnai)
+pibtsder <- rwf(pibts,4,drift=TRUE)
+plot(pibtsder)
+
+evalmed <- accuracy(pibtspro)
+evaling <- accuracy(pibtsnai)
+evalsnai <- accuracy(pibtssnai)
+evalder <- accuracy(pibtsder)
