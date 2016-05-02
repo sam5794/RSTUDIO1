@@ -1,0 +1,55 @@
+cremx <- read.csv("C:\\Users\\SALA-C19\\Documents\\SAM\\PIBM.csv")
+cremxts <- ts(cremx [,2], start = 1961, end=2014)
+plot(cremxts)
+
+
+
+install.packages("fpp")
+library (fpp)
+require (forecast)
+
+plot(cremxts, main = "TASA DE CRECIMIENTO DEL PIB EN MEXICO, 1961-2014",
+     xlab = "AÑOS",
+     ylab = "TASA DE CRECIMIENTO")
+
+
+res2 <- residuals(snaive(cremxts))
+res3 <- residuals(rwf(cremxts))
+res3
+res2
+plot(res2, main="RESIDUALES DE INGENUO ESTACIONAL",
+     ylab = "RESIDUALES",
+     xlab = "AÑOS")
+
+
+Acf(res2, main = "Acf de residuales")###para saber si hay i no correlacion entre los residups 
+hist(res2, main = "Histograma de Residulaes")### para conocer si lños residuos se distributyen normal
+
+
+
+plot(res3, main="RESIDUALES DE LA DERIVA",
+     ylab = "RESIDUALES",
+     xlab = "AÑOS")
+Acf(res3, main = "Acf de residuales")###para saber si hay i no correlacion entre los residups 
+hist(res3, main = "Histograma de Residulaes")### para conocer si lños residuos se distributyen normal
+
+
+
+res4 <- residuals(meanf(cremxts))
+res5 <- residuals(naive(cremxts))
+res4
+
+plot(res4, main="RESIDUALES DE LA MEDIA",
+     ylab = "RESIDUALES",
+     xlab = "AÑOS")
+Acf(res4, main = "Acf de residuales")###para saber si hay i no correlacion entre los residups 
+hist(res4, main = "Histograma de Residulaes")### para conocer si lños residuos se distributyen normal
+
+plot(res5, main="RESIDUALES DE INGENUO",
+     ylab = "RESIDUALES",
+     xlab = "AÑOS")
+Acf(res5, main = "Acf de residuales")###para saber si hay i no correlacion entre los residups 
+hist(res5, main = "Histograma de Residulaes")### para conocer si lños residuos se distributyen normal
+
+Box.test(res2, lag=10,fitdf = 0)###lag=momento que se pronostican, fitdf= parametros que tiene la serie de tiempo o numero de grados de libertad
+Box.test(res2, lag=10, fitdf = 0, type = "Lj")
