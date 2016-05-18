@@ -1,0 +1,25 @@
+require ("foreign")
+install.packages("forecast")
+require ("forecast")
+
+bimbo <- read.csv("C:\\Users\\SALA-C28.RTIC-C28-HP\\Documents\\R\\BIMBO.csv",header = T )
+bimbots <- ts(bimbo,start = 2000, end = 2007, frequency = 12)
+plot(bimbots)
+
+ajustehl <- holt(bimbots,initial="simple",h=4)
+ajustehe <- holt(bimbots,initial="simple", exponential=T,h=4)
+
+ajusteaa <- holt(bimbots,damped=T)
+ajustema <- holt(bimbots, exponential=T,damped=T)
+
+plot(ajustehl)
+
+plot(bimbots, plot.conf = FALSE,main = "Precio Cierre Bimbo")
+lines(fitted(ajustehl), col=80)
+lines(fitted(ajustehe), col =2)
+lines(fitted(ajusteaa), col =3)
+lines(fitted(ajustema), col =4)
+
+legend("topleft",lty=1,col= c(80,2,3,4),
+       legend=c("Ajuste Holt lienal","Ajuste Holt exponencial","Ajuste Holt tendencia aditiva amortiguado","Ajuste Holt tendencia multiplicativa amortiguado"))
+
