@@ -1,0 +1,323 @@
+getwd()
+## RECUPERANDO LA BASE DE DATOS DE TIPO DE CAMBIO BANCARIO ##
+tipodecambio<-read.csv("tipo_de_cambio2.csv",dec=".", header = TRUE)
+
+##CONVIRTIENDO LA BASE DE DATOS EN UNA SERIE DE TIEMPO##
+dolar.ts<-ts(tipodecambio,start=c(1997,1),end=c(2015,4),fr=12)
+dolar.ts
+max.ret <- trunc(length(dolar.ts)/4)
+max.ret
+?ts
+#Descomponiendo la serie 
+ts.decom.dolar<-decompose(dolar.ts,type="multiplicative")
+plot(ts.decom.dolar)#
+
+  #Extraemos la tendencia 
+
+tendencia.dolar<-ts.decom.dolar$trend
+estacionalidad.dolar<-ts.decom.dolar$seasonal
+ts.plot(cbind(tendencia.dolar,tendencia.dolar*estacionalidad.dolar), col="blue",lty=1:2)
+ciclo.dolar<-tendencia.dolar^2
+plot(ciclo.dolar)
+###################################CODIGO SARIMA########################
+#Raíces Unitarias
+library(tseries)
+adf<-adf.test(dolar.ts)
+adf
+##DADO QUE EL P VALUE NO ES MENOR A .05 SE RECHAZA LA HIPOTESIS, SE TIENE QUE DIFERENCIAR LA SERIE
+dif<-diff(dolar.ts)
+dif
+dadf<-adf.test(dif)
+dadf
+## DADO QUE EL P  VALUE EN ESTE CASO ES MENOR QUE .05 LA HIPOTESIS NO SE RECHAZA
+
+# 1: IDENTIFICACIÓN (gráficos de la serie y de sus fas y fap)
+plot.ts(dolar.ts, xlab="Tiempo", ylab="Tipo de cambio")
+acf(dolar.ts, lag.max=max.ret)
+pacf(dolar.ts, lag.max=max.ret)
+
+# Se observa tendencia y componente estacional, por lo que aplicamos diferencia regular
+## PREGUNTAR SI EL DOLAR TIENE COMPONENTE ESTACIONAL
+dolardif <- diff(dolar.ts, lag=1)
+plot.ts(dolardif, xlab="Tiempo", ylab="")
+acf(dolardif, lag.max=max.ret)
+pacf(dolardif, lag.max=max.ret)
+# Se ha eliminado tendencia, aunque la componente estacional (s=12) persiste, se diferencia la serie estacionalmente
+dolar.dif12 <- diff(dolardif, lag=12)
+plot.ts(dolar.dif12, xlab="Tiempo", ylab="Tipo de cambio")
+acf(dolar.dif12, lag.max=max.ret)
+pacf(dolar.dif12, lag.max=max.ret)
+
+#Estimacion
+install.packages("forecast")
+library(timsac)
+library(forecast)
+z = auto.arima(dolardif)
+z
+sarima012<-arima(dolar.ts,order=c(1,0,2), seasonal=list(order=c(0,1,0),fr=12))## PREGUNTAR SOBRE EL ORDEN
+sarima012
+sarima012$coef
+#comprobación supuestos Ruido Blanco
+library(tseries)
+Box.test(sarima012$residuals)
+#no rechaza la hipotesis de ruido blanco ya que el valor p es mayor de 0.05
+# Gráficos
+plot(sarima012$residuals)
+qqnorm(sarima012$residuals)
+# Contrastes
+tsdiag(sarima012)
+t.test(sarima012$residuals, mu=0)
+jarque.bera.test(sarima012$residuals)
+shapiro.test(sarima012$residuals)
+# Horizonte: 12
+horizonte <- 12
+dolar.pr <- predict(sarima012, n.ahead=horizonte)
+dolar.pr
+plot(dolar.ts)
+lines(dolar.pr$pred,col=4)
+sarima012$coef
+
+##Sacar logaritmo de la serie
+# calculate log-returns for GARCH analysis
+dolar.log = log(dolar.ts)
+
+#Grafico de logaritmos
+plot(dolar.log)
+
+#Grafico con logaritmos, cuadrado de logaritmos y con absolutos
+dataToPlot = cbind(dolar.log, dolar.log^2, abs(dolar.log))
+colnames(dataToPlot) = c("Dolar Log", "Dolar Log^2", "abs(Dolar Log)")
+plot.zoo(dataToPlot, main="Logaritmos dolar", col="blue")
+
+# plot autocorrelations of returns, returns^2 and abs(returns)
+par(mfrow=c(2,2))
+acf(dolar.log, main="Logaritmo dolar")
+acf(dolar.log^2, main="Logaritmo Dolar^2")
+acf(abs(dolar.log), main="Dolar logaritmo abs")
+par(mfrow=c(1,1)) 
+library(PerformanceAnalytics)
+# Estadisticas
+table.Stats(dolar.log)
+
+############# SIMULANDO PROCESO ARCH ###################
+
+
+# specify arch(1) model
+arch1.spec = ugarchspec(variance.model = list(garchOrder=c(1,0)), 
+                        mean.model = list(armaOrder=c(0,0)),
+                        fixed.pars=list(mu = 0, omega=0.1, alpha1=0.8))
+class(arch1.spec)
+arch1.spec
+?ugarchpath
+set.seed(123)
+arch1.sim = ugarchpath(arch1.spec, n.sim=12)
+# result is an S4 object
+class(arch1.sim)
+# [1] "uGARCHpath"
+# attr(,"package")
+# [1] "rugarch"
+slotNames(arch1.sim)
+# [1] "path"  "model" "seed"
+names(arch1.sim@path)
+# [1] "sigmaSim"  "seriesSim" "residSim" 
+
+# use the plot method to plot simulated series and conditional volatilities
+par(mfrow=c(2,1))
+plot(arch1.sim, which=2)
+plot(arch1.sim, which=1)
+par(mfrow=c(1,1))
+
+par(mfrow=c(3,1))
+acf(arch1.sim@path$seriesSim, main="DolarLog")
+acf(arch1.sim@path$seriesSim^2, main="DolarLog^2")
+acf(abs(arch1.sim@path$seriesSim), main="abs(DolarLog)")
+par(mfrow=c(1,1))
+
+# use qqPlot() function from car package
+qqPlot(arch1.sim@path$seriesSim, ylab="ARCH(1) Returns")
+
+# simulate GARCH(1,1) process
+#
+
+# specify GARCH(1,1) model
+garch11.spec = ugarchspec(variance.model = list(garchOrder=c(1,1)), 
+                          mean.model = list(armaOrder=c(0,0)),
+                          fixed.pars=list(mu = 0, omega=0.1, alpha1=0.1,
+                                          beta1 = 0.7))
+set.seed(123)
+garch11.sim = ugarchpath(garch11.spec, n.sim=1000)
+
+# use the plot method to plot simulated series and conditional volatilities
+par(mfrow=c(2,1))
+plot(garch11.sim, which=2)
+plot(garch11.sim, which=1)
+par(mfrow=c(1,1))
+
+par(mfrow=c(3,1))
+acf(garch11.sim@path$seriesSim, main="Returns")
+acf(garch11.sim@path$seriesSim^2, main="Returns^2")
+acf(abs(garch11.sim@path$seriesSim), main="abs(Returns)")
+par(mfrow=c(1,1))
+
+# use qqPlot() function from car package
+qqPlot(garch11.sim@path$seriesSim, ylab="GARCH(1,1) Returns")
+
+#
+# Testing for ARCH/GARCH effects in dolar
+#
+
+# use Box.test from stats package
+Box.test(coredata(dolar.log^2), type="Ljung-Box", lag = 12)
+
+
+# use ArchTest() function from FinTS package for Engle's LM test
+ArchTest(dolar.log) 
+
+
+#
+# Estimate GARCH(1,1)
+#
+# specify GARCH(1,1) model with only constant in mean equation
+garch11.spec = ugarchspec(variance.model = list(garchOrder=c(1,1)), 
+                          mean.model = list(armaOrder=c(0,0)))
+dolar.garch11.fit = ugarchfit(spec=garch11.spec, data=dolar.log,
+                             solver.control=list(trace = 1))                          
+class(dolar.garch11.fit)
+slotNames(dolar.garch11.fit)
+names(dolar.garch11.fit@fit)
+names(dolar.garch11.fit@model)
+
+# show garch fit
+dolar.garch11.fit
+
+# use extractor functions
+
+# estimated coefficients
+coef(dolar.garch11.fit)
+# unconditional mean in mean equation
+uncmean(dolar.garch11.fit)
+# unconditional variance: omega/(alpha1 + beta1)
+uncvariance(dolar.garch11.fit)
+# persistence: alpha1 + beta1
+persistence(dolar.garch11.fit)
+# half-life:
+halflife(dolar.garch11.fit)
+
+# residuals: e(t)
+plot.ts(residuals(dolar.garch11.fit), ylab="e(t)", col="blue")
+abline(h=0)
+
+# sigma(t) = conditional volatility
+plot.ts(dolar.garch11.fit@fit$sigma, ylab="sigma(t)", col="blue")
+
+# illustrate plot method
+
+plot(dolar.garch11.fit, which=1)
+plot(dolar.garch11.fit, which="all")
+plot(dolar.garch11.fit, which=9)
+#
+# simulate from fitted model
+#
+dolar.garch11.sim
+dolar.garch11.sim = ugarchsim(dolar.garch11.fit,
+                             n.sim=nrow(dolar.log),
+                             rseed=123,
+                             startMethod="unconditional")
+class(dolar.garch11.sim)
+slotNames(dolar.garch11.sim)
+
+# plot actual returns and simulated returns
+par(mfrow=c(2,1))
+plot(dolar.log, main="Actual dolarlo")
+plot(dolar.garch11.sim@simulation$seriesSim,
+     main="Simulated GARCH(1,1) ")
+par(mfrow=c(1,1))
+
+#
+# fit ARCH(1) using "cleaned data"
+#
+library(robustbase)
+# convergence problems with ARCH(1) fit to MSFT
+arch1.spec = ugarchspec(variance.model = list(garchOrder=c(1,0)), 
+                        mean.model = list(armaOrder=c(0,0)))
+dolar.arch1.fit = ugarchfit(spec=arch1.spec, data = dolar.log,
+                           solver.control=list(trace = 1))
+
+dolar.ret.clean = Return.clean(dolar.log, method="boudt")
+par(mfrow=c(2,1))
+plot(dolar.log, main="Raw Dolar", ylab="Dolar")
+plot(dolar.ret.clean, main="Cleaned dolar inf", ylab="dolar")
+par(mfrow=c(1,1))
+
+dolar.clean.arch1.fit = ugarchfit(spec=arch1.spec, data=dolar.ret.clean,
+                                 solver.control=list(trace = 1))
+dolar.clean.arch1.fit
+
+
+#
+# model selection on GARCH(p,q) models
+#
+
+arch.order = 1:5
+arch.names = paste("arch", arch.order, sep="")
+
+# fit all arch models with p <= 5
+arch.list = list()
+for (p in arch.order) {
+  arch.spec = ugarchspec(variance.model = list(garchOrder=c(p,0)), 
+                         mean.model = list(armaOrder=c(0,0)))
+  arch.fit = ugarchfit(spec=arch.spec, data=dolar.ret.clean,
+                       solver.control=list(trace = 0))
+  arch.list[[p]] = arch.fit
+}
+names(arch.list) = arch.names
+
+# refit GARCH(1,1) to cleaned data
+garch11.fit = ugarchfit(spec=garch11.spec, data=dolar.ret.clean,
+                        solver.control=list(trace = 0))
+arch.list$garch11 = garch11.fit
+
+# extract information criteria for all models
+info.mat = sapply(arch.list, infocriteria)
+rownames(info.mat) = rownames(infocriteria(arch.list[[1]]))
+info.mat
+
+
+# 
+# compare arch(5) to garch(1,1)
+#
+
+par(mfrow=c(2,1))
+plot.ts(dolar.garch11.fit@fit$sigma, main="GARCH(1,1) conditional vol",
+        ylab="vol", col="blue")
+plot.ts(dolar.arch1.fit@fit$sigma, main="ARCH(5) conditional vol",
+        ylab="vol", col="blue")
+par(mfrow=c(1,1))
+
+#
+# forecasting
+#
+
+############################PARA CAMBIAR EL TIEMPO DE PREDICCIÓN####################
+dolar.garch11.fcst = ugarchforecast(dolar.garch11.fit, n.ahead=12)
+class(dolar.garch11.fcst)
+slotNames(dolar.garch11.fcst)
+names(dolar.garch11.fcst@forecast)
+
+dolar.garch11.fcst
+
+par(mfrow=c(2,1))
+plot(dolar.garch11.fcst, which=1)
+plot(dolar.garch11.fcst, which=3)
+par(mfrow=c(1,1))
+
+# 
+# forecast from ARCH(5)
+# 
+dolar.arch5.fcst = ugarchforecast(arch.list$arch5, n.ahead=12)###############AQUI CAMBIAS EL TIEMPO
+
+par(mfrow=c(2,1))
+plot(dolar.arch5.fcst, which=1)
+plot(dolar.arch5.fcst, which=3)
+
+par(mfrow=c(1,1))
